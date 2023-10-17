@@ -4,9 +4,12 @@ namespace Laravel\Sanctum;
 
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Sanctum\Contracts\HasAbilities;
+use GeneaLabs\LaravelModelCaching\Traits\Cachable;
 
 class PersonalAccessToken extends Model implements HasAbilities
 {
+    use Cachable;
+
     /**
      * The attributes that should be cast to native types.
      *

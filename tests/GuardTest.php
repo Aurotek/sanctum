@@ -16,6 +16,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Laravel\Sanctum\PersonalAccessToken;
 use Laravel\Sanctum\Sanctum;
 use Laravel\Sanctum\SanctumServiceProvider;
+use GeneaLabs\LaravelModelCaching\Providers\Service;
 use Mockery;
 use Orchestra\Testbench\TestCase;
 use stdClass;
@@ -461,7 +462,10 @@ class GuardTest extends TestCase
 
     protected function getPackageProviders($app)
     {
-        return [SanctumServiceProvider::class];
+        return [
+            SanctumServiceProvider::class,
+            Service::class,
+        ];
     }
 }
 
