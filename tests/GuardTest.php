@@ -170,6 +170,9 @@ class GuardTest extends TestCase
     {
         Config::set('sanctum.update_last_used_at', false);
 
+        $this->loadLaravelMigrations(['--database' => 'testbench']);
+        $this->artisan('migrate', ['--database' => 'testbench'])->run();
+
         $factory = Mockery::mock(AuthFactory::class);
 
         $guard = new Guard($factory, null);
@@ -185,10 +188,18 @@ class GuardTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('Authorization', 'Bearer test');
 
-        $token = PersonalAccessTokenFactory::new()->for(
-            $user = UserFactory::new()->create(), 'tokenable'
-        )->create([
+        $user = User::forceCreate([
+            'name' => 'Taylor Otwell',
+            'email' => 'taylor@laravel.com',
+            'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+            'remember_token' => Str::random(10),
+        ]);
+
+        $token = PersonalAccessToken::forceCreate([
+            'tokenable_id' => $user->id,
+            'tokenable_type' => get_class($user),
             'name' => 'Test',
+            'token' => hash('sha256', 'test'),
         ]);
 
         $returnedUser = $guard->__invoke($request);
