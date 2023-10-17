@@ -80,4 +80,6 @@ return [
         'verify_csrf_token' => App\Http\Middleware\VerifyCsrfToken::class,
     ],
 
+    'update_last_used_at' => env('SANCTUM_UPDATE_LAST_USED_AT', true),
+
 ];

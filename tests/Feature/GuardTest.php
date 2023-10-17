@@ -19,6 +19,7 @@ use stdClass;
 use Workbench\App\Models\User;
 use Workbench\Database\Factories\PersonalAccessTokenFactory;
 use Workbench\Database\Factories\UserFactory;
+use Config;
 
 class GuardTest extends TestCase
 {
@@ -192,6 +193,38 @@ class GuardTest extends TestCase
         $this->assertEquals($user->id, $returnedUser->id);
         $this->assertEquals($token->id, $returnedUser->currentAccessToken()->id);
         $this->assertInstanceOf(DateTimeInterface::class, $returnedUser->currentAccessToken()->last_used_at);
+    }
+
+    public function test_authentication_is_successful_with_token_if_no_session_present_and_update_last_used_at_is_disabled()
+    {
+        Config::set('sanctum.update_last_used_at', false);
+
+        $factory = Mockery::mock(AuthFactory::class);
+
+        $guard = new Guard($factory, null);
+
+        $webGuard = Mockery::mock(stdClass::class);
+
+        $factory->shouldReceive('guard')
+                ->with('web')
+                ->andReturn($webGuard);
+
+        $webGuard->shouldReceive('user')->once()->andReturn(null);
+
+        $request = Request::create('/', 'GET');
+        $request->headers->set('Authorization', 'Bearer test');
+
+        $token = PersonalAccessTokenFactory::new()->for(
+            $user = UserFactory::new()->create(), 'tokenable'
+        )->create([
+            'name' => 'Test',
+        ]);
+
+        $returnedUser = $guard->__invoke($request);
+
+        $this->assertEquals($user->id, $returnedUser->id);
+        $this->assertEquals($token->id, $returnedUser->currentAccessToken()->id);
+        $this->assertNull($returnedUser->currentAccessToken()->last_used_at);
     }
 
     public function test_authentication_with_token_fails_if_user_provider_is_invalid()
