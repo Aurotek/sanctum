@@ -64,4 +64,6 @@ return [
         'encrypt_cookies' => App\Http\Middleware\EncryptCookies::class,
     ],
 
+    'update_last_used_at' => env('SANCTUM_UPDATE_LAST_USED_AT', true),
+
 ];
